@@ -1,0 +1,194 @@
+# Title: **Identifications and Solutions for the Aging Workforce in Malaysia**
+
+### **Group Members:**
+```{r echo = FALSE, results = 'asis'}
+name1 <- c('Wong Jia Hui', 'S2192852')
+name2 <- c('Danial Mirza Bin Madrawi', '22062607')
+name3 <- c('Low Boon Kiat', '17138399')
+name4 <- c('Hongsheng Jie', '22064728')
+name5 <- c('Yuejing Huang', 'S2158553')
+row_names <- c(1:5)
+col_names <- c('Names', 'Matric ID')
+member_df <- data.frame(matrix(c(name1, name2, name3, name4, name5), 5, 2, byrow = TRUE, dimnames = list(row_names, col_names)))
+library(knitr)
+kable(member_df)
+```
+### **Introduction**
+According to a report from United Nations (UN) in 2015, the world is moving towards an aging population. The number of elderly population is estimated to reach 1.4 billion by 2030 and 2.1 billion by 2050. The ageing of the world's population is the result of decline in birth rate and increased life expectancy due to better health facilities which have changed the demographic trends across the global. One of the major impacts faced by the organisation and governments will be aging workforce. Organisation and governments are required to make adjustment on the existing infrastructure and policies to meet the needs of aging workforce trends.
+
+This project focuses on identifying the trends of aging workforce in Malaysia and discusses how Malaysia could address the challenges arise from aging workforce based on the collected time-series data starting from year 1982 to year 2021. A predictive model will also be proposed for predicting the unemployment rate and growth rate of aging workforce in Malaysia.
+
+### **Objective**
+The objectives of this project are:-
+
+1. To identify trends of aging workforce in Malaysia.
+2. To propose mitigation measures to address aging workforce challenges.
+3. To develop a predictive model for predicting unemployment rate and growth rate of aging workforce.
+
+### **Methodology**
+**Danial please include the methodology here**
+
+### **Data Understanding**
+During Data Understanding phase, raw data is identified, collected and analyzed for the usage of this project
+
+**1. Raw Data**  
+All the raw data sets are downloaded from https://www.dosm.gov.my/portal-main/time-series  
+A total of five (5) different raw data sets are used in this project, as listed below:-
+
+* Under category of Malaysia Economic Statistics - Time Series 2019  
+    + No.19 - Population  
+    
+* Under category of  Labour Force Survery (LFS) Time Series Statistics by State, 1982 - 2021  
+    + No.1 - Employed persons by age group, Malaysia/states
+    + No.9 - Labour force by age group, Malaysia/states
+    + No.18 - Principal statistics of the labour force by sex, Malaysia
+    
+Since multiple raw datasets are acquired, data extraction and data integration is required to process the raw datasets into a clean dataset for data analysis and to train the predictive model.
+
+**2. Data Description**
+
+The description of each raw data sets collected is shown in the table below:-
+
+|Name of Raw Dataset|   Description |
+|:----------------------------------------------|:-------------------------------------------------|
+|No.19 - Population|    It contains data for the population of Malaysia (1892 - 2019), main demographic rates (1911 - 2019), life expectancy at birth by ethnic group and sex (1956 - 2019) and age-specific fertility rate and total fertility rate (1956 - 2019). The interested data for our project usage will be Malaysia population, life expectancy and birth rate|
+|No.1 - Employed persons by age group, Malaysia/states|   It contains data on the number of employed person by age group in Malaysia (1982 - 2021)|
+|No.9 - Labour force by age group, Malaysia/states|   It contains data on the number of labour force by age group in Malaysia (1982 - 2021)|
+|No.18 - Principal statistics of the labour force by sex, Malaysia|   It contains data on the number of labour force and employed person by sex in Malaysia (1982 - 2021)|
+
+**3. Data Quality**
+
+The comments on the data quality of those collected raw data sets are shown below:-
+
+|Name of Raw Dataset|   Comments on Data Quality|
+|:----------------------------------------------|:-------------------------------------------------|
+|No.19 - Population |   Missing data for year 2020 and year 2021|
+|No.1 - Employed persons by age group, Malaysia/states|   Missing data for year 1991 and year 1993|
+|No.9 - Labour force by age group, Malaysia/states|   Missing data for year 1991 and year 1993|
+|No.18 - Principal statistics of the labour force by sex, Malaysia|   Missing data for year 1991 and year 1993|
+
+Based on the comments, data cleaning is required to fill in the missing values. The process of data cleaning will be discussed in later stage.
+
+### **Data Preparation**
+**1. Data Extraction and Selection**
+```{r}
+# Extract data from raw .xlsx file and create a new dataframe
+library(xlsx)
+population_df <- read.xlsx("no19.xlsx", sheetIndex = 1, rowIndex = 6:91, colIndex = 1:7)
+lifeexp_df <- read.xlsx("no19.xlsx", sheetIndex = 3, rowIndex = 12:66, colIndex = 1:11)
+birthrate_df <- read.xlsx("no19.xlsx", sheetIndex = 2, rowIndex = 13:117, colIndex = 1:9)
+labour_df <- read.xlsx("no9.xlsx", sheetIndex = 1, rowIndex = 5:43, colIndex = 2:13)
+employ_df <- read.xlsx("no1.xlsx", sheetIndex = 1, rowIndex = 5:43, colIndex = 2:13)
+malewf_df <- read.xlsx("no18.xlsx", sheetIndex = 1, rowIndex = 8:46, colIndex = 2:9)
+femalewf_df <- read.xlsx("no18.xlsx", sheetIndex = 2, rowIndex = 8:46, colIndex = 2:9)
+
+# Rename column names
+colnames(population_df) <- c("year", "total", "", "age0-14", "age15-64", "age65+", "avg_apgr")
+colnames(lifeexp_df) <- c("year", "m_life", "f_life", "bm_life", "bf_life", "cm_life", "cf_life", "im_life", "if_life", "om_life", "of_life")
+colnames(birthrate_df) <- c("year", "cr_naturalincrease", "crude_br", "crude_dr", "total_fr", "neonatal_mr", "infant_mr", "toddler_mr", "maternal_mr")
+colnames(labour_df) <- c("year", "total", "age15-19", "age20-24", "age25-29", "age30-34", "age35-39", "age40-44", "age45-49", "age50-54", "age55-59", "age60-64")
+colnames(employ_df) <- c("year", "total", "age15-19", "age20-24", "age25-29", "age30-34", "age35-39", "age40-44", "age45-49", "age50-54", "age55-59", "age60-64")
+colnames(malewf_df) <-c("year", "m_lf", "m_employed", "m_work<30hrs", "m_unemployed", "m_outside_lf", "participationrate_lf", "unemployment_rate")
+colnames(femalewf_df) <-c("year", "f_lf", "f_employed", "f_work<30hrs", "f_unemployed", "f_outside_lf", "participationrate_lf", "unemployment_rate")
+
+# Add new rows with empty data to represent missing year and remove data that do not fall within the year of 1982 - 2021
+new_row1 <- population_df[1:2,]
+new_row1[] <- NA
+population_df <- rbind(population_df, new_row1)
+population_df <- population_df[-1:-47,]
+population_df$year <- c(1982:2021)
+
+new_row1 <- lifeexp_df[1:2,]
+new_row1[] <- NA
+lifeexp_df <- rbind(lifeexp_df, new_row1)
+lifeexp_df <- lifeexp_df[-1:-16,]
+lifeexp_df$year <- c(1982:2021)
+
+new_row1 <- birthrate_df[1:2,]
+new_row1[] <- NA
+birthrate_df <- rbind(birthrate_df, new_row1)
+birthrate_df <- birthrate_df[-1:-66,]
+birthrate_df$year <- c(1982:2021)
+
+library(tidyverse)
+labour_df <- labour_df %>% add_row(year = 1991, `age15-19` = NA, `age20-24` = NA, `age25-29` = NA, `age30-34` = NA, `age35-39` = NA, `age40-44` = NA, `age45-49` = NA, `age50-54` = NA, `age55-59` = NA, `age60-64` = NA, .before = 10)
+labour_df <- labour_df %>% add_row(year = 1994, `age15-19` = NA, `age20-24` = NA, `age25-29` = NA, `age30-34` = NA, `age35-39` = NA, `age40-44` = NA, `age45-49` = NA, `age50-54` = NA, `age55-59` = NA, `age60-64` = NA, .before = 13)
+
+employ_df <- employ_df %>% add_row(year = 1991, `age15-19` = NA, `age20-24` = NA, `age25-29` = NA, `age30-34` = NA, `age35-39` = NA, `age40-44` = NA, `age45-49` = NA, `age50-54` = NA, `age55-59` = NA, `age60-64` = NA, .before = 10)
+employ_df <- employ_df %>% add_row(year = 1994, `age15-19` = NA, `age20-24` = NA, `age25-29` = NA, `age30-34` = NA, `age35-39` = NA, `age40-44` = NA, `age45-49` = NA, `age50-54` = NA, `age55-59` = NA, `age60-64` = NA, .before = 13)
+
+malewf_df <- malewf_df %>% add_row(year = 1991, m_lf = NA, m_employed = NA, `m_work<30hrs`= NA, m_unemployed = NA, m_outside_lf = NA, participationrate_lf = NA, unemployment_rate = NA, .before = 10)
+malewf_df <- malewf_df %>% add_row(year = 1991, m_lf = NA, m_employed = NA, `m_work<30hrs`= NA, m_unemployed = NA, m_outside_lf = NA, participationrate_lf = NA, unemployment_rate = NA, .before = 13)
+
+femalewf_df <- femalewf_df %>% add_row(year = 1991, f_lf = NA, f_employed = NA, `f_work<30hrs`= NA, f_unemployed = NA, f_outside_lf = NA, participationrate_lf = NA, unemployment_rate = NA, .before = 10)
+femalewf_df <- femalewf_df %>% add_row(year = 1991, f_lf = NA, f_employed = NA, `f_work<30hrs`= NA, f_unemployed = NA, f_outside_lf = NA, participationrate_lf = NA, unemployment_rate = NA, .before = 13)
+
+# Filter out the required data for data merging/integration to create a brand new dataset for our project usage
+labour_df$`age15-59` <- rowSums(labour_df[,3:11])
+employ_df$`age15-59` <- rowSums(employ_df[,3:11])
+df <- data.frame(population_df$year, malewf_df$m_lf, femalewf_df$f_lf, malewf_df$m_employed, femalewf_df$f_employed, population_df$`age0-14`, labour_df$`age15-59`, labour_df$`age60-64`, employ_df$`age15-59`, employ_df$`age60-64`, population_df$`age65+`, lifeexp_df$m_life, lifeexp_df$f_life, birthrate_df$crude_br)
+colnames(df) <- c('year', 'm_lf', 'f_lf', 'm_employed', 'f_employed', 'age0-14', 'age15-59_lf', 'age60-64_lf', 'age15-59_employ', 'age60-64_employ', 'age65+', 'm_life', 'f_life', 'br')
+
+# Check for data structure and standardize it (if required)
+str(df)
+df[, c("age0-14", "age65+", "br")] <- lapply(df[, c("age0-14", "age65+", "br")], as.numeric)
+str(df)
+df[,2:14] <- round(df[,2:14], 2)
+```
+
+After the data wrangling process, a **dataset, df** is created and ready for data cleaning process.
+
+The data description is explained in the table below:-
+
+|Column Name|Description|
+|:----------------------------------|:---------------------------------|
+|year|Year for collected data|
+|m_lf|Male labour force (in thousand)|
+|f_lf|Female labour force (in thousand)|
+|m_employed|Male employed person (in thousand) |
+|f_employed|Female employed person (in thousand)|
+|age0-14|Population under the age of 0 - 14 (in thousand)|
+|age15-59_lf|Labour force under the agoe of 15 - 59 (in thousand)|
+|age60-64_lf|Labour force under the age of 60 - 64 (in thousand)|
+|age15-59_employ|Employed person under the age of 15 - 59 (in thousand)|
+|age60-64_employ|Employed person under the age of 60 -64 (in thousand)|
+|age65+|Population above the age of 65|
+|m_life|Male life expectancy|
+|f_life|Female life expectancy|
+|br|Birth rate (in %)|
+
+### **Data Cleaning**
+**Boon Kiat Please do include your explanation for data cleaning**
+```{r}
+clean_df <- df
+
+# Model-based imputation for missing data
+i<-1
+j<-1
+for (i in 1:nrow(clean_df)){
+     for (j in 1:ncol(clean_df)){
+         if (is.na(clean_df[i,j])==TRUE){
+             fit_data<-clean_df[(i-2):(i+2),c(2,j)]
+             model<-lm(unlist(clean_df[(i-2):(i+2),j])~unlist(clean_df[(i-2):(i+2),"year"]),fit_data,na.action=na.exclude)
+             new_data<-data.frame(clean_df[(i-2):(i+2),2])
+             predicted_data<-predict(model,new_data)
+             clean_df[i,j]<-predicted_data[3]
+         }else if(i==40){
+             break
+         }else{
+             i=i+1
+             j=j+1
+         }
+     }
+}
+
+# Round to 1 decimal place
+clean_df[,2:14] <- round(clean_df[,2:14],1)
+clean_df
+write.csv(clean_df, file="clean-data.csv",row.names=FALSE)
+```
+### **Exploratory Data Analysis (EDA)**
+
+### **Modeling**
+
+### **Results and Discussion**
