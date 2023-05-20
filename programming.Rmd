@@ -158,19 +158,21 @@ The data description is explained in the table below:-
 |br|Birth rate (in %)|
 
 ### **Data Cleaning**
-**Boon Kiat Please do include your explanation for data cleaning**
+There are 27 NAs in data frame. To impute the NAs, we make use of predict() function to predict each NA based on its neighboring data. First, we make use of for loop iteration and is.na() function to identify NAs. Each time we locate a NA, we create a subset named fit_data which includes two preceding rows and two succeeding rows. The fit_data includes only "year" column and the column with NA as evident by c(1,j). Next, we make use of lm() function to compute a linear model for fit_data. For this linear model, column with NA is outcome variable whereas "year" is predictor variable. Next, we apply predict() function to obtain a predicted value for the NA. 
 ```{r}
 clean_df <- df
+# Find the number of NAs in each column of data frame
+print(sapply(clean_df, function(x) sum(is.na(x)))) 
 
-# Model-based imputation for missing data
+# Impute NAs using linear regression model
 i<-1
 j<-1
 for (i in 1:nrow(clean_df)){
      for (j in 1:ncol(clean_df)){
          if (is.na(clean_df[i,j])==TRUE){
-             fit_data<-clean_df[(i-2):(i+2),c(2,j)]
+             fit_data<-clean_df[(i-2):(i+2),c(1,j)]
              model<-lm(unlist(clean_df[(i-2):(i+2),j])~unlist(clean_df[(i-2):(i+2),"year"]),fit_data,na.action=na.exclude)
-             new_data<-data.frame(clean_df[(i-2):(i+2),2])
+             new_data<-clean_df[(i-2):(i+2),"year"]
              predicted_data<-predict(model,new_data)
              clean_df[i,j]<-predicted_data[3]
          }else if(i==40){
