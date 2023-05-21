@@ -26,7 +26,14 @@ The objectives of this project are:-
 3. To develop a predictive model for predicting unemployment rate and growth rate of aging workforce.
 
 ### **Methodology**
-**Danial please include the methodology here**
+1. Define Problem: The problem from this project is defined. To prove the labor force of Malaysia is aging using Population Dataset.
+2. Data Procurement: The data sources were obtained from Ministry of Statistics Malaysia website. 
+3. Data Understanding: Finding the existence of null value, the definition of each columns.
+4. Data Preparation: Concatinating multiple sources into one, change the intital columns' names into more understandatble names. Separate labour force by age groups and genders. Convert age columns into numeric columns 
+5. Data Cleaning: Null values were replaced with value using Linear Model. The data now void from any null value.
+6. Exploratory Data Analysis: Using the data, descriptive and visual analysis of the data was done to uncover patterns, trends, relationships, and insights. You may also use statistical tests and hypothesis testing to validate your findings.
+7. Modeling: This is where you apply various machine learning or statistical techniques to build predictive or explanatory models based on the data. You should also evaluate the performance and accuracy of your models using appropriate metrics and methods.
+8. Results and Discussion: This is where you communicate your findings and recommendations to the stakeholders or audience. You should also discuss the limitations and assumptions of your analysis, as well as any future steps or improvements that can be made.
 
 ### **Data Understanding**
 During Data Understanding phase, raw data is identified, collected and analyzed for the usage of this project
@@ -188,7 +195,135 @@ clean_df
 write.csv(clean_df, file="clean-data.csv",row.names=FALSE)
 ```
 ### **Exploratory Data Analysis (EDA)**
+```{r}
+# Load libraries
+library("dplyr")
+library("ggplot2")
+library("reshape2")
 
+# Load files
+data = read.csv("clean-data.csv")
+# Create DataFrame
+df = data.frame(data)
+# Check datatypes of DataFrame columns
+str(df)
+# Summarize DataFame
+summary(df)
+# Check columns' names 
+colnames(df)
+# Change columns' names 
+colnames(df) = c("Year",
+                 "Labour_Force_Male_thousands", 
+                 "Labour_Force_Female_thousands", 
+                 "Employed_Male_thousands", 
+                 "Employed_Female_thousands",
+                 "Age_0_to_14_thousands", 
+                 "Labour_Force_Age_15_to_59_thousands",
+                 "Labour_Force_Age_60_to_64_thousands",
+                 "Employed_Age_15_to_59_thousands",
+                 "Employed_Age_60_to_64_thousands",
+                 "Age_above_65", 
+                 "Life_Expectancy_Male",
+                 "Life_Expectancy_Female",
+                 "Birth_Rate_percentage")
+```
+
+**The Total Labour Force in Malaysia has been increasing from 1982 to 2021**
+
+```{r}
+# Total Labour Force
+df$Labour_Force_Male_thousands+ df$Labour_Force_Female_thousands
+# Total Labour Force by Year
+ggplot(data = df["Labour_Force_Male_thousands"] + df["Labour_Force_Female_thousands"],
+       mapping = aes(x = as.integer(df$Year), 
+                     y = Labour_Force_Male_thousands)) +
+        geom_point() +
+        geom_line() +
+        labs(title = "Total Labour Force", subtitle = "Total Labour Force from 1982 to 2021", x = "Years", y = "Total Labour Force")
+```
+
+**The Total Employed Labour Force in Malaysia has been increasing from 1982 to 2019 but stagnant since 2020**
+
+```{r}
+# Total Employed Labour
+ggplot(data = df["Employed_Male_thousands"] + df["Employed_Female_thousands"],
+       mapping = aes(x = as.integer(df$Year), 
+                     y = Employed_Male_thousands)) +
+        geom_point() +
+        geom_line() +
+        labs(title = "Total Employed Labour", subtitle = "Total Employed Labour from 1982 to 2021", x = "Years", y = "Total Employed Labour")
+```
+
+**The Total Umemployed Labour Force in Malaysia has been increasing slowly from 1997 to 2018 but skyrocketed since 2019**
+
+```{r}
+# Total Umemployed Labour
+ggplot(data = (df["Labour_Force_Male_thousands"] + df["Labour_Force_Female_thousands"])-(df["Employed_Male_thousands"] + df["Employed_Female_thousands"]),
+       mapping = aes(x = as.integer(df$Year), 
+                     y = Labour_Force_Male_thousands)) +
+        geom_point() +
+        geom_line()+
+        labs(title = "Unemployed Labour", subtitle = "Total of Unemployed Labour from 1982 to 2021", x = "Years", y = "Total Unemployed Labour")
+```
+
+**The Total Employed Labour Force in Malaysia aged 15 to 59 has been increasing since 1982 but slow growth of Total Employed Labour Force in Malaysia aged 60 to 64 neticed since 2011**
+
+```{r}
+# Total Employed Labor by Group Age
+ggplot(data = melt(data = cbind(Year = as.integer(df$Year), df) %>% select(c("Year", "Labour_Force_Age_15_to_59_thousands","Labour_Force_Age_60_to_64_thousands")), id.vars = "Year"),
+       mapping = aes(x = Year, 
+                     y = value,
+                     colour = variable, 
+                     group = variable)) +
+        geom_point() +
+        geom_line()+
+        labs(title = "Total Employed Labor by Group Age", subtitle = "Total Employed Labour by Group Age from 1982 to 2021", x = "Years", y = "Total Unemployed Labour")
+```
+**The Life Expectancy of Female and Male have been incresing since 1982 except for the Male where their Life Expectancy Stagnated sine 2015**
+
+```{r}
+# Live Expentancy by Gender
+ggplot(data = melt(data = cbind(Year = as.integer(df$Year), df) %>% select(c("Year", "Life_Expectancy_Male", "Life_Expectancy_Female")), id.vars = "Year"),
+       mapping = aes(x = Year, 
+                     y = value,
+                     colour = variable, 
+                     group = variable)) +
+        geom_point() +
+        geom_line()+
+        labs(title = "Live Expentancy by Gender", subtitle = "Life Expectancy by Gender from 1982 to 2021", x = "Years", y = "Life Expectancy")
+```
+
+**The Total Population in Malaysia has increase since 1982 but the Birth rate of Malaysians has slowly decreasing since 1982**
+
+```{r}
+# Total Population VS Birth rate
+Total_Population = df['Age_0_to_14_thousands'] + df['Labour_Force_Age_15_to_59_thousands'] + df['Labour_Force_Age_60_to_64_thousands'] + df['Age_above_65']
+colnames(Total_Population) = "Total_Population"
+cbind(Year = Total_Population/100, df)[c("Year" , "Total_Population", "Birth_Rate_percentage")]
+#melt(cbind(Year = Total_Population/100, df)[c("Year" , "Total_Population", "Birth_Rate_percentage")], , id.vars = "Year")
+ggplot(data = melt(cbind(Year = Total_Population/100, df)[c("Year" , "Total_Population", "Birth_Rate_percentage")], , id.vars = "Year"),
+       mapping = aes(x = Year, 
+                     y = value,
+                    colour = variable, 
+                     group = variable)) +
+        geom_point() +
+        geom_line()+
+        labs(title = "Total Population VS Birth rate", subtitle = "Total Population VS Birth rate from 1982 to 2021", x = "Years")
+```
+
+**The Total Malaysian Population age 14 and below slowly increasing unlike huge increase Malaysian age between 15 to 59, there is slow increase of Malaysian age 60 and above**
+
+```{r}
+# Malaysia Population by Age Group
+Population_by_Age_Group = df[c('Year', 'Age_0_to_14_thousands', 'Labour_Force_Age_15_to_59_thousands', 'Labour_Force_Age_60_to_64_thousands','Age_above_65')]
+Population_by_Age_Group
+ggplot(data = melt(Population_by_Age_Group, id.vars = "Year"),
+       mapping = aes(x = Year, 
+                     y = value,
+                    fill = variable)) +
+        geom_area() +
+        labs(title = "Malaysia Population by Age Group", subtitle = "Malaysia Population by Age Group from 1982 to 2021", x = "Years", y = "Total Population")
+```
 ### **Modeling**
 
 ### **Results and Discussion**
