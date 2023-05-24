@@ -452,26 +452,44 @@ lines(c(data$year[31:40]),lm_predictions,col="red",lwd=3,lty=2)
 legend("topleft", legend = c("Actual value", "Predictive value"), col = c("blue", "red"), lty = 1, lwd = 2)
 ```
 
+** Random Forest**
 
-{r}
+```{r}
 library(randomForest)
-data <- read.csv("clean-data.csv")
-data <- data.frame(data)
+data <- read.csv("clean-data.csv", header = T)
+data$age60.64_lf
+x <- c(data$age60.64_lf)
+growth_rate <- vector()
+for (i in 2:length(x)) {
+  growth_rate[i-1] <- round((x[i] - x[i-1]) / x[i-1],3)
+  
+}
+aveg <- round(sum(growth_rate[1:length(growth_rate)])/length(growth_rate),3)
+growth_rate <- c(aveg,growth_rate)
+classic <- vector()
+for (i in 1:length(growth_rate)) {
+  if (growth_rate[i] > 0) {
+    classic[i] <- 1
+  } else {
+    classic[i] <- 0
+  }
+}
+classic
+data$growth_rate <- growth_rate
+data$classic <- classic
 
 train_indices <- sample(1:nrow(data), size = 0.8 * nrow(data), replace = FALSE)
 train_data <- data[train_indices, ]  
-test_data <- data[-train_indices, ]
-
-train_data$new <- as.factor(train_data$new)
-test_data$new <- as.factor(test_data$new)
-
-model <- randomForest(new ~ ., data = train_data, ntree = 100, mtry = 2, method = "classification")
+test_data <- data[-train_indices, ]  
+train_data$classic <- as.factor(train_data$classic)
+test_data$classic <- as.factor(test_data$classic)
+model <- randomForest(classic ~ ., data = train_data, ntree = 100, mtry = 2, method = "classification")
 predictions <- predict(model, newdata = test_data, type = "class")
 
 library(ggplot2)
 test_data$Index <- seq_len(nrow(test_data))
 plot_data <- rbind(
-  data.frame(Index = test_data$Index, Value = test_data$new, Type = "Actual"),
+  data.frame(Index = test_data$Index, Value = test_data$classic, Type = "Actual"),
   data.frame(Index = test_data$Index, Value = predictions, Type = "Predicted")
 )
 
@@ -480,8 +498,8 @@ ggplot(plot_data, aes(x = Index, y = Value, color = Type, group = Type)) +
   geom_point() +
   labs(x = "Index", y = "Value", color = "Type") +
   theme_minimal()
-accuracy <- sum(predictions == test_data$new) / length(predictions)
+accuracy <- sum(predictions == test_data$classic) / length(predictions)
 print(paste("Accuracy:", round(accuracy * 100, 2), "%"))
-
+```
 
 ### **Results and Discussion**
