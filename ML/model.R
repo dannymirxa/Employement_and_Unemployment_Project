@@ -1,4 +1,3 @@
-install.packages("randomForest")
 library(randomForest)
 data <- read.csv("d:\\Users\\ys-lenovo\\Desktop\\clean-data.csv", header = T)
 data
