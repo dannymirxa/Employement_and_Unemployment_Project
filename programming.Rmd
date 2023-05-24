@@ -228,8 +228,7 @@ colnames(df) = c("Year",
                  "Birth_Rate_percentage")
 ```
 
-**The Total Labour Force in Malaysia has been increasing from 1982 to 2021**
-
+### Chart 1: Total Labour Force by Year
 ```{r}
 # Total Labour Force
 df$Labour_Force_Male_thousands+ df$Labour_Force_Female_thousands
@@ -242,8 +241,13 @@ ggplot(data = df["Labour_Force_Male_thousands"] + df["Labour_Force_Female_thousa
         labs(title = "Total Labour Force", subtitle = "Total Labour Force from 1982 to 2021", x = "Years", y = "Total Labour Force")
 ```
 
-**The Total Employed Labour Force in Malaysia has been increasing from 1982 to 2019 but stagnant since 2020**
+**Findings:**
 
+* The Total Labour Force in Malaysia has been increasing from 1982 to 2021
+
+
+
+### Chart 2: Total Employed Labour by Year
 ```{r}
 # Total Employed Labour
 ggplot(data = df["Employed_Male_thousands"] + df["Employed_Female_thousands"],
@@ -254,8 +258,13 @@ ggplot(data = df["Employed_Male_thousands"] + df["Employed_Female_thousands"],
         labs(title = "Total Employed Labour", subtitle = "Total Employed Labour from 1982 to 2021", x = "Years", y = "Total Employed Labour")
 ```
 
-**The Total Umemployed Labour Force in Malaysia has been increasing slowly from 1997 to 2018 but skyrocketed since 2019**
+**Findings:**
 
+* The Total Employed Labour Force in Malaysia has been increasing from 1982 to 2019 but stagnant since 2020
+
+
+
+### Chart 3: Total Unemployed Labour by Year
 ```{r}
 # Total Umemployed Labour
 ggplot(data = (df["Labour_Force_Male_thousands"] + df["Labour_Force_Female_thousands"])-(df["Employed_Male_thousands"] + df["Employed_Female_thousands"]),
@@ -266,10 +275,15 @@ ggplot(data = (df["Labour_Force_Male_thousands"] + df["Labour_Force_Female_thous
         labs(title = "Unemployed Labour", subtitle = "Total of Unemployed Labour from 1982 to 2021", x = "Years", y = "Total Unemployed Labour")
 ```
 
-**The Total Employed Labour Force in Malaysia aged 15 to 59 has been increasing since 1982 but slow growth of Total Employed Labour Force in Malaysia aged 60 to 64 neticed since 2011**
+**FIndings: **
 
+* The Total Umemployed Labour Force in Malaysia has been increasing slowly from 1997 to 2018 but skyrocketed since 2019
+
+
+
+### Chart 4: Total Employed Labour by Age
 ```{r}
-# Total Employed Labor by Group Age
+# Total Employed Labour by Group Age
 ggplot(data = melt(data = cbind(Year = as.integer(df$Year), df) %>% select(c("Year", "Labour_Force_Age_15_to_59_thousands","Labour_Force_Age_60_to_64_thousands")), id.vars = "Year"),
        mapping = aes(x = Year, 
                      y = value,
@@ -279,10 +293,16 @@ ggplot(data = melt(data = cbind(Year = as.integer(df$Year), df) %>% select(c("Ye
         geom_line()+
         labs(title = "Total Employed Labor by Group Age", subtitle = "Total Employed Labour by Group Age from 1982 to 2021", x = "Years", y = "Total Unemployed Labour")
 ```
-**The Life Expectancy of Female and Male have been incresing since 1982 except for the Male where their Life Expectancy Stagnated sine 2015**
 
+**Findings: **
+
+* The Total Employed Labour Force in Malaysia aged 15 to 59 has been increasing since 1982 but slow growth of Total Employed Labour Force in Malaysia aged 60 to 64 since 2011
+
+
+
+### Chart 5: Male and Female Life Expectancy by Year
 ```{r}
-# Live Expentancy by Gender
+# Live Expectancy by Gender
 ggplot(data = melt(data = cbind(Year = as.integer(df$Year), df) %>% select(c("Year", "Life_Expectancy_Male", "Life_Expectancy_Female")), id.vars = "Year"),
        mapping = aes(x = Year, 
                      y = value,
@@ -293,8 +313,13 @@ ggplot(data = melt(data = cbind(Year = as.integer(df$Year), df) %>% select(c("Ye
         labs(title = "Live Expentancy by Gender", subtitle = "Life Expectancy by Gender from 1982 to 2021", x = "Years", y = "Life Expectancy")
 ```
 
-**The Total Population in Malaysia has increase since 1982 but the Birth rate of Malaysians has slowly decreasing since 1982**
+**Findings: **
 
+* The Life Expectancy of Female and Male have been incresing since 1982 except for the Male where their Life Expectancy Stagnated sine 2015
+
+
+
+### Chart 6: Total Population vs Birth Rate
 ```{r}
 # Total Population VS Birth rate
 Total_Population = df['Age_0_to_14_thousands'] + df['Labour_Force_Age_15_to_59_thousands'] + df['Labour_Force_Age_60_to_64_thousands'] + df['Age_above_65']
@@ -311,12 +336,16 @@ ggplot(data = melt(cbind(Year = Total_Population/100, df)[c("Year" , "Total_Popu
         labs(title = "Total Population VS Birth rate", subtitle = "Total Population VS Birth rate from 1982 to 2021", x = "Years")
 ```
 
-**The Total Malaysian Population age 14 and below slowly increasing unlike huge increase Malaysian age between 15 to 59, there is slow increase of Malaysian age 60 and above**
+**Findings:**
 
+* The Total Population in Malaysia has increase since 1982 but the Birth rate of Malaysians has slowly decreasing since 1982
+
+
+
+### Chart 7: Malaysia Population by Age Group
 ```{r}
 # Malaysia Population by Age Group
 Population_by_Age_Group = df[c('Year', 'Age_0_to_14_thousands', 'Labour_Force_Age_15_to_59_thousands', 'Labour_Force_Age_60_to_64_thousands','Age_above_65')]
-Population_by_Age_Group
 ggplot(data = melt(Population_by_Age_Group, id.vars = "Year"),
        mapping = aes(x = Year, 
                      y = value,
@@ -324,7 +353,105 @@ ggplot(data = melt(Population_by_Age_Group, id.vars = "Year"),
         geom_area() +
         labs(title = "Malaysia Population by Age Group", subtitle = "Malaysia Population by Age Group from 1982 to 2021", x = "Years", y = "Total Population")
 ```
+
+**Findings: **
+
+* The Total Malaysian Population age 14 and below slowly increasing unlike huge increase Malaysian age between 15 to 59, there is slow increase of Malaysian age 60 and above
+
+
+
 ### **Modeling**
+
+**ARIMA model**
+
+Predicting unemployment rate and plot for trends of aging workforce in Malaysia
+```{r}
+# Libraries
+library(tseries)
+library(tidyverse)
+library(forecast)
+library(ggplot2)
+library(dplyr)
+library(hrbrthemes)
+library(viridis)
+library(randomForest)
+
+data <- read.csv("clean-data.csv")
+
+
+# Plot
+ggplot(data, aes(x = year)) +
+  geom_line(aes(y = m_lf, color = "male workforce")) +
+  geom_line(aes(y = f_lf, color = "fmale workforce")) +
+  geom_line(aes(y = age15.59_lf, color = "age15-60 workforece")) +
+  geom_line(aes(y = age60.64_lf,color="age60-64 workforce")) +
+  geom_line(aes(y=m_lf+f_lf,color="overall workforce"))+
+  labs(x = "year", y = "number of workforce",title="Trends of aging workforce in Malaysia") +
+  guides(size=none)+
+  theme(axis.text = element_text(size=12),
+        plot.title = element_text(hjust=0.5))
+  scale_color_manual(values = c("#0072BD", "#D95319", "#EDB120","#7E2F8E","#77AC30"),
+                     labels = c("male workforce", "fmale workforce", "age15-60 workforece","age60-64 workforce","overall workforce"))
+
+
+
+#Calculate the unemployment rate and add it to the unemployment_rate column of data
+data$unemployment_rate <- round((rowSums(data[,c('m_lf','f_lf')])-rowSums(data[,c('age15.59_employ','age60.64_employ')]))/ rowSums(data[,c('m_lf','f_lf')]),2)
+
+#Pick out the unemployment rate and the year
+unemployment_data <- data %>% select(year,unemployment_rate)
+#covert to time series data
+ts_unemployment_data <- ts(unemployment_data$unemployment_rate,start=c(1982),frequency = 1)
+plot(ts_unemployment_data)
+
+#Judging how many splits are needed to transform into a stationary sequence
+ndiffs(ts_unemployment_data)
+
+#First order difference processing
+dts_unemployment_data <- diff(ts_unemployment_data)
+plot(dts_unemployment_data)
+
+#Augmented Dickey-Fuller
+ADF <- adf.test(dts_unemployment_data)
+
+#Model order determination and fitting
+fit <- auto.arima(ts_unemployment_data)
+accuracy(fit)
+
+#model diagnosis
+qqnorm(fit$residuals)
+qqline(fit$residuals)
+Box.test(fit$residuals,type="Ljung-Box")
+
+#prediction
+forecast(fit,3)
+plot(forecast(fit,3),xlab = "Year",ylab = "unemployment rate")
+
+#prophet
+library(prophet)
+library(zoo)
+prophet_unemployment_data <- unemployment_data
+prophet_unemployment_data$year <- as.yearmon(prophet_unemployment_data$year)
+colnames(prophet_unemployment_data) <- c("ds","y")
+prophet_model <- prophet(prophet_unemployment_data,
+                         growth = "linear",
+                         yearly.seasonality = TRUE,weekly.seasonality = FALSE,
+                         daily.seasonality = FALSE,seasonality.mode = "multiplicative")
+
+future <- make_future_dataframe(prophet_model,periods = 24,freq = "month")
+myForecast <- predict(prophet_model,future)
+plot(prophet_model,myForecast)
+
+
+
+#lm
+lm_model <- lm(age60.64_employ~.-year-unemployment_rate,data=data[1:30,])
+lm_predictions <- predict(lm_model, newdata = data[31:40,])
+plot(c(data$year[31:40]),data$age60.64_employ[31:40],type="l",col="blue",lwd=3,lty=1)
+lines(c(data$year[31:40]),lm_predictions,col="red",lwd=3,lty=2)
+legend("topleft", legend = c("Actual value", "Predictive value"), col = c("blue", "red"), lty = 1, lwd = 2)
+```
+
 
 {r}
 library(randomForest)
