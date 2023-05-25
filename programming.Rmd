@@ -29,7 +29,7 @@ The objectives of this project are:-
 1. Define Problem: The problem from this project is defined. To prove the labor force of Malaysia is aging using Population Dataset.
 2. Data Procurement: The data sources were obtained from Ministry of Statistics Malaysia website. 
 3. Data Understanding: Finding the existence of null value, the definition of each columns.
-4. Data Preparation: Concatinating multiple sources into one, change the intital columns' names into more understandatble names. Separate labour force by age groups and genders. Convert age columns into numeric columns 
+4. Data Preparation: Concatenating multiple sources into one, change the initial columns' names into more understandable names. Separate labour force by age groups and genders. Convert age columns into numeric columns 
 5. Data Cleaning: Null values were replaced with value using Linear Model. The data now void from any null value.
 6. Exploratory Data Analysis: Using the data, descriptive and visual analysis of the data was done to uncover patterns, trends, relationships, and insights. You may also use statistical tests and hypothesis testing to validate your findings.
 7. Modeling: This is where you apply various machine learning or statistical techniques to build predictive or explanatory models based on the data. You should also evaluate the performance and accuracy of your models using appropriate metrics and methods.
@@ -316,7 +316,7 @@ ggplot(data = melt(data = cbind(Year = as.integer(df$Year), df) %>% select(c("Ye
 **Findings: **
 
 * The Life Expectancy of Female and Male have been incresing since 1982 except for the Male where their Life Expectancy Stagnated sine 2015
-
+* The Life Expectancy of Female is greater than the Life Expectancy of Male from 1982 to 2021.
 
 
 ### Chart 6: Total Population vs Birth Rate
@@ -502,4 +502,14 @@ accuracy <- sum(predictions == test_data$classic) / length(predictions)
 print(paste("Accuracy:", round(accuracy * 100, 2), "%"))
 ```
 
-### **Results and Discussion**
+### **Discussion**
+1. Does the model prove if there is a trend of aging workforce in Malaysia?
+
+2. Which model performs better for time-series data?
+
+3. What is the increase in percentage of unemployment rate in Malaysia?
+
+4. What are the proposed mitigation measures on the aging workforce in Malaysia?
+
+
+### **Conclusion**
