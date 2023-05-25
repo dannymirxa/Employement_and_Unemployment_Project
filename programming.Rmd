@@ -26,7 +26,14 @@ The objectives of this project are:-
 3. To develop a predictive model for predicting unemployment rate and growth rate of aging workforce.
 
 ### **Methodology**
-**Danial please include the methodology here**
+1. Define Problem: The problem from this project is defined. To prove the labor force of Malaysia is aging using Population Dataset.
+2. Data Procurement: The data sources were obtained from Ministry of Statistics Malaysia website. 
+3. Data Understanding: Finding the existence of null value, the definition of each columns.
+4. Data Preparation: Concatenating multiple sources into one, change the initial columns' names into more understandable names. Separate labour force by age groups and genders. Convert age columns into numeric columns 
+5. Data Cleaning: Null values were replaced with value using Linear Model. The data now void from any null value.
+6. Exploratory Data Analysis: Using the data, descriptive and visual analysis of the data was done to uncover patterns, trends, relationships, and insights. You may also use statistical tests and hypothesis testing to validate your findings.
+7. Modeling: This is where you apply various machine learning or statistical techniques to build predictive or explanatory models based on the data. You should also evaluate the performance and accuracy of your models using appropriate metrics and methods.
+8. Results and Discussion: This is where you communicate your findings and recommendations to the stakeholders or audience. You should also discuss the limitations and assumptions of your analysis, as well as any future steps or improvements that can be made.
 
 ### **Data Understanding**
 During Data Understanding phase, raw data is identified, collected and analyzed for the usage of this project
@@ -158,7 +165,7 @@ The data description is explained in the table below:-
 |br|Birth rate (in %)|
 
 ### **Data Cleaning**
-**Boon Kiat Please do include your explanation for data cleaning**
+There are 27 NAs in data frame. To impute the NAs, we make use of predict() function to predict each NA based on its neighboring data. First, we make use of for loop iteration and is.na() function to identify NAs. Each time we locate a NA, we create a subset named fit_data which includes two preceding rows and two succeeding rows. The fit_data includes only "year" column and the column with NA as evident by c(1,j). Next, we make use of lm() function to compute a linear model for fit_data. For this linear model, column with NA is outcome variable whereas "year" is predictor variable. Next, we apply predict() function to obtain a predicted value for the NA. 
 ```{r}
 clean_df <- df
 
@@ -188,9 +195,175 @@ clean_df
 write.csv(clean_df, file="clean-data.csv",row.names=FALSE)
 ```
 ### **Exploratory Data Analysis (EDA)**
+```{r}
+# Load libraries
+library("dplyr")
+library("ggplot2")
+library("reshape2")
+
+# Load files
+data = read.csv("clean-data.csv")
+# Create DataFrame
+df = data.frame(data)
+# Check datatypes of DataFrame columns
+str(df)
+# Summarize DataFame
+summary(df)
+# Check columns' names 
+colnames(df)
+# Change columns' names 
+colnames(df) = c("Year",
+                 "Labour_Force_Male_thousands", 
+                 "Labour_Force_Female_thousands", 
+                 "Employed_Male_thousands", 
+                 "Employed_Female_thousands",
+                 "Age_0_to_14_thousands", 
+                 "Labour_Force_Age_15_to_59_thousands",
+                 "Labour_Force_Age_60_to_64_thousands",
+                 "Employed_Age_15_to_59_thousands",
+                 "Employed_Age_60_to_64_thousands",
+                 "Age_above_65", 
+                 "Life_Expectancy_Male",
+                 "Life_Expectancy_Female",
+                 "Birth_Rate_percentage")
+```
+
+### Chart 1: Total Labour Force by Year
+```{r}
+# Total Labour Force
+df$Labour_Force_Male_thousands+ df$Labour_Force_Female_thousands
+# Total Labour Force by Year
+ggplot(data = df["Labour_Force_Male_thousands"] + df["Labour_Force_Female_thousands"],
+       mapping = aes(x = as.integer(df$Year), 
+                     y = Labour_Force_Male_thousands)) +
+        geom_point() +
+        geom_line() +
+        labs(title = "Total Labour Force", subtitle = "Total Labour Force from 1982 to 2021", x = "Years", y = "Total Labour Force")
+```
+
+**Findings:**
+
+* The Total Labour Force in Malaysia has been increasing from 1982 to 2021
+
+
+
+### Chart 2: Total Employed Labour by Year
+```{r}
+# Total Employed Labour
+ggplot(data = df["Employed_Male_thousands"] + df["Employed_Female_thousands"],
+       mapping = aes(x = as.integer(df$Year), 
+                     y = Employed_Male_thousands)) +
+        geom_point() +
+        geom_line() +
+        labs(title = "Total Employed Labour", subtitle = "Total Employed Labour from 1982 to 2021", x = "Years", y = "Total Employed Labour")
+```
+
+**Findings:**
+
+* The Total Employed Labour Force in Malaysia has been increasing from 1982 to 2019 but stagnant since 2020
+
+
+
+### Chart 3: Total Unemployed Labour by Year
+```{r}
+# Total Umemployed Labour
+ggplot(data = (df["Labour_Force_Male_thousands"] + df["Labour_Force_Female_thousands"])-(df["Employed_Male_thousands"] + df["Employed_Female_thousands"]),
+       mapping = aes(x = as.integer(df$Year), 
+                     y = Labour_Force_Male_thousands)) +
+        geom_point() +
+        geom_line()+
+        labs(title = "Unemployed Labour", subtitle = "Total of Unemployed Labour from 1982 to 2021", x = "Years", y = "Total Unemployed Labour")
+```
+
+**FIndings: **
+
+* The Total Umemployed Labour Force in Malaysia has been increasing slowly from 1997 to 2018 but skyrocketed since 2019
+
+
+
+### Chart 4: Total Employed Labour by Age
+```{r}
+# Total Employed Labour by Group Age
+ggplot(data = melt(data = cbind(Year = as.integer(df$Year), df) %>% select(c("Year", "Labour_Force_Age_15_to_59_thousands","Labour_Force_Age_60_to_64_thousands")), id.vars = "Year"),
+       mapping = aes(x = Year, 
+                     y = value,
+                     colour = variable, 
+                     group = variable)) +
+        geom_point() +
+        geom_line()+
+        labs(title = "Total Employed Labor by Group Age", subtitle = "Total Employed Labour by Group Age from 1982 to 2021", x = "Years", y = "Total Unemployed Labour")
+```
+
+**Findings: **
+
+* The Total Employed Labour Force in Malaysia aged 15 to 59 has been increasing since 1982 but slow growth of Total Employed Labour Force in Malaysia aged 60 to 64 since 2011
+
+
+
+### Chart 5: Male and Female Life Expectancy by Year
+```{r}
+# Live Expectancy by Gender
+ggplot(data = melt(data = cbind(Year = as.integer(df$Year), df) %>% select(c("Year", "Life_Expectancy_Male", "Life_Expectancy_Female")), id.vars = "Year"),
+       mapping = aes(x = Year, 
+                     y = value,
+                     colour = variable, 
+                     group = variable)) +
+        geom_point() +
+        geom_line()+
+        labs(title = "Live Expentancy by Gender", subtitle = "Life Expectancy by Gender from 1982 to 2021", x = "Years", y = "Life Expectancy")
+```
+
+**Findings: **
+
+* The Life Expectancy of Female and Male have been incresing since 1982 except for the Male where their Life Expectancy Stagnated sine 2015
+* The Life Expectancy of Female is greater than the Life Expectancy of Male from 1982 to 2021.
+
+
+### Chart 6: Total Population vs Birth Rate
+```{r}
+# Total Population VS Birth rate
+Total_Population = df['Age_0_to_14_thousands'] + df['Labour_Force_Age_15_to_59_thousands'] + df['Labour_Force_Age_60_to_64_thousands'] + df['Age_above_65']
+colnames(Total_Population) = "Total_Population"
+cbind(Year = Total_Population/100, df)[c("Year" , "Total_Population", "Birth_Rate_percentage")]
+#melt(cbind(Year = Total_Population/100, df)[c("Year" , "Total_Population", "Birth_Rate_percentage")], , id.vars = "Year")
+ggplot(data = melt(cbind(Year = Total_Population/100, df)[c("Year" , "Total_Population", "Birth_Rate_percentage")], , id.vars = "Year"),
+       mapping = aes(x = Year, 
+                     y = value,
+                    colour = variable, 
+                     group = variable)) +
+        geom_point() +
+        geom_line()+
+        labs(title = "Total Population VS Birth rate", subtitle = "Total Population VS Birth rate from 1982 to 2021", x = "Years")
+```
+
+**Findings:**
+
+* The Total Population in Malaysia has increase since 1982 but the Birth rate of Malaysians has slowly decreasing since 1982
+
+
+
+### Chart 7: Malaysia Population by Age Group
+```{r}
+# Malaysia Population by Age Group
+Population_by_Age_Group = df[c('Year', 'Age_0_to_14_thousands', 'Labour_Force_Age_15_to_59_thousands', 'Labour_Force_Age_60_to_64_thousands','Age_above_65')]
+ggplot(data = melt(Population_by_Age_Group, id.vars = "Year"),
+       mapping = aes(x = Year, 
+                     y = value,
+                    fill = variable)) +
+        geom_area() +
+        labs(title = "Malaysia Population by Age Group", subtitle = "Malaysia Population by Age Group from 1982 to 2021", x = "Years", y = "Total Population")
+```
+
+**Findings: **
+
+* The Total Malaysian Population age 14 and below slowly increasing unlike huge increase Malaysian age between 15 to 59, there is slow increase of Malaysian age 60 and above
+
+
 
 ### **Modeling**
-**code for predicting unemployment rate and plot for trends of aging workforce in Malaysia**
+
+**ARIMA model and PROPHET model**
+  In forecasting the unemployment rate we used ARIMA and Prophet models, both ARIMA and Prophet models are commonly used time series forecasting models. By using m_lf (Male labor force), f_lf (Female labor force), m_employed (Male employed person), and f_employed (Female employed person) in the dataset we calculate the annual Malaysian Unemployment rate is calculated for each year, and the unemployment rate is projected for the next three years (2022, 2023, 2024) using two models, ARIMA and PROPHET, based on the distribution of data in both columns of year and unemployment rate.
 ```{r}
 # Libraries
 library(tseries)
@@ -239,11 +412,9 @@ plot(dts_unemployment_data)
 
 #Augmented Dickey-Fuller
 ADF <- adf.test(dts_unemployment_data)
-ADF
 
 #Model order determination and fitting
 fit <- auto.arima(ts_unemployment_data)
-fit
 accuracy(fit)
 
 #model diagnosis
@@ -266,9 +437,9 @@ prophet_model <- prophet(prophet_unemployment_data,
                          yearly.seasonality = TRUE,weekly.seasonality = FALSE,
                          daily.seasonality = FALSE,seasonality.mode = "multiplicative")
 
-future <- make_future_dataframe(prophet_model,periods = 24,freq = "month")
+future <- make_future_dataframe(prophet_model,periods = 3,freq = "year")
 myForecast <- predict(prophet_model,future)
-plot(prophet_model,myForecast)
+plot(prophet_model,myForecast,xlab="Year",ylab="unemployment rate")
 
 
 
@@ -279,4 +450,67 @@ plot(c(data$year[31:40]),data$age60.64_employ[31:40],type="l",col="blue",lwd=3,l
 lines(c(data$year[31:40]),lm_predictions,col="red",lwd=3,lty=2)
 legend("topleft", legend = c("Actual value", "Predictive value"), col = c("blue", "red"), lty = 1, lwd = 2)
 ```
-### **Results and Discussion**
+
+** Random Forest**
+
+```{r}
+library(randomForest)
+data <- read.csv("clean-data.csv", header = T)
+data$age60.64_lf
+x <- c(data$age60.64_lf)
+growth_rate <- vector()
+for (i in 2:length(x)) {
+  growth_rate[i-1] <- round((x[i] - x[i-1]) / x[i-1],3)
+  
+}
+aveg <- round(sum(growth_rate[1:length(growth_rate)])/length(growth_rate),3)
+growth_rate <- c(aveg,growth_rate)
+classic <- vector()
+for (i in 1:length(growth_rate)) {
+  if (growth_rate[i] > 0) {
+    classic[i] <- 1
+  } else {
+    classic[i] <- 0
+  }
+}
+classic
+data$growth_rate <- growth_rate
+data$classic <- classic
+
+train_indices <- sample(1:nrow(data), size = 0.8 * nrow(data), replace = FALSE)
+train_data <- data[train_indices, ]  
+test_data <- data[-train_indices, ]  
+train_data$classic <- as.factor(train_data$classic)
+test_data$classic <- as.factor(test_data$classic)
+model <- randomForest(classic ~ ., data = train_data, ntree = 100, mtry = 2, method = "classification")
+predictions <- predict(model, newdata = test_data, type = "class")
+
+library(ggplot2)
+test_data$Index <- seq_len(nrow(test_data))
+plot_data <- rbind(
+  data.frame(Index = test_data$Index, Value = test_data$classic, Type = "Actual"),
+  data.frame(Index = test_data$Index, Value = predictions, Type = "Predicted")
+)
+
+ggplot(plot_data, aes(x = Index, y = Value, color = Type, group = Type)) +
+  geom_line() +
+  geom_point() +
+  labs(x = "Index", y = "Value", color = "Type") +
+  theme_minimal()
+accuracy <- sum(predictions == test_data$classic) / length(predictions)
+print(paste("Accuracy:", round(accuracy * 100, 2), "%"))
+```
+
+### **Discussion**
+1. Does the model prove if there is a trend of aging workforce in Malaysia?
+
+2. Which model performs better for time-series data?
+  In our project, ARIMA and PROPHET models predict the unemployment rate in the ARIMA model performs better because the trend of our unemployment rate data is unstable and in this case, ARIMA performs better. ARIMA model has the adaptive capacity to handle the non-stationarity of the data through automatic difference and autoregressive moving average process. It can capture trends and seasonal patterns in the data and forecast them accordingly. In addition, the ARIMA model can provide confidence intervals on the forecast results for assessing the forecast uncertainty. This is useful for dealing with forecasts of unstable data. the Prophet model has some disadvantages in dealing with non-stationary data. the Prophet model uses a predefined trend and seasonal model and may not be flexible enough to accommodate certain complex non-linear trends or seasonal patterns.
+
+3. What is the increase in percentage of unemployment rate in Malaysia?
+  First, we need to understand how to view the results of the ARIMA forecasts in the figure above. The last colored area in the figure is the forecast results for the three years 2022, 2023, and 2024, with the light gray area indicating the 95% confidence region (95% probability that the forecast results will fall in this range), and similarly the dark gray area indicating the 80% confidence region, and the blue dots indicating the average. From the graph, we can get that the career rate in 2022 has 80% probability between 0.04%-0.06%, 2023 is 0.035%-0.065%, 2024 is 0.032%-0.068%, and their average is 0.05%, which means that in the next three years, according to the ARIMA model, the unemployment rate will be about 0.05%.
+
+4. What are the proposed mitigation measures on the aging workforce in Malaysia?
+
+
+### **Conclusion**
