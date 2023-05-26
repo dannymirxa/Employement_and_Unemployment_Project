@@ -459,6 +459,7 @@ data <- read.csv("clean-data.csv", header = T)
 data$age60.64_lf
 x <- c(data$age60.64_lf)
 growth_rate <- vector()
+#Calculate the growth_rate aging workforce
 for (i in 2:length(x)) {
   growth_rate[i-1] <- round((x[i] - x[i-1]) / x[i-1],3)
   
@@ -466,6 +467,7 @@ for (i in 2:length(x)) {
 aveg <- round(sum(growth_rate[1:length(growth_rate)])/length(growth_rate),3)
 growth_rate <- c(aveg,growth_rate)
 classic <- vector()
+#Make growth_rate to be classification data
 for (i in 1:length(growth_rate)) {
   if (growth_rate[i] > 0) {
     classic[i] <- 1
@@ -477,33 +479,34 @@ classic
 data$growth_rate <- growth_rate
 data$classic <- classic
 
-train_indices <- sample(1:nrow(data), size = 0.8 * nrow(data), replace = FALSE)
-train_data <- data[train_indices, ]  
-test_data <- data[-train_indices, ]  
+train_indices <- sample(1:nrow(data), size = 0.8 * nrow(data), replace = FALSE) #Select 80% of the data as the train_data
+train_data <- data[train_indices, ]  #Selecting the train_data from the data
+test_data <- data[-train_indices, ]  #Use the remaining data as a test_data
 train_data$classic <- as.factor(train_data$classic)
 test_data$classic <- as.factor(test_data$classic)
-model <- randomForest(classic ~ ., data = train_data, ntree = 100, mtry = 2, method = "classification")
-predictions <- predict(model, newdata = test_data, type = "class")
+model <- randomForest(classic ~ ., data = train_data, ntree = 100, mtry = 2, method = "classification") # Training random forest model (classification type)
+predictions <- predict(model, newdata = test_data, type = "class") # Predictions on the test_data
 
 library(ggplot2)
-test_data$Index <- seq_len(nrow(test_data))
+test_data$Index <- seq_len(nrow(test_data)) # Add an index column for the test_data
+# Create a data frame for plotting
 plot_data <- rbind(
   data.frame(Index = test_data$Index, Value = test_data$classic, Type = "Actual"),
   data.frame(Index = test_data$Index, Value = predictions, Type = "Predicted")
 )
-
+# Plot the line plot with individual data points
 ggplot(plot_data, aes(x = Index, y = Value, color = Type, group = Type)) +
   geom_line() +
   geom_point() +
   labs(x = "Index", y = "Value", color = "Type") +
   theme_minimal()
-accuracy <- sum(predictions == test_data$classic) / length(predictions)
+accuracy <- sum(predictions == test_data$classic) / length(predictions) #Calculate the accuracy
 print(paste("Accuracy:", round(accuracy * 100, 2), "%"))
 ```
 
 ### **Discussion**
 1. Does the model prove if there is a trend of aging workforce in Malaysia?
-
+  The model proves that there is a trend of aging workforce in Malaysia.Because according to the model,we can get that aging workforce is appearing more frequently.
 2. Which model performs better for time-series data?
   In our project, ARIMA and PROPHET models predict the unemployment rate in the ARIMA model performs better because the trend of our unemployment rate data is unstable and in this case, ARIMA performs better. ARIMA model has the adaptive capacity to handle the non-stationarity of the data through automatic difference and autoregressive moving average process. It can capture trends and seasonal patterns in the data and forecast them accordingly. In addition, the ARIMA model can provide confidence intervals on the forecast results for assessing the forecast uncertainty. This is useful for dealing with forecasts of unstable data. the Prophet model has some disadvantages in dealing with non-stationary data. the Prophet model uses a predefined trend and seasonal model and may not be flexible enough to accommodate certain complex non-linear trends or seasonal patterns.
 
