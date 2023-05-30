@@ -191,7 +191,7 @@ for (i in 1:nrow(clean_df)){
 
 # Round to 1 decimal place
 clean_df[,2:14] <- round(clean_df[,2:14],1)
-clean_df
+print(clean_df)
 write.csv(clean_df, file="clean-data.csv",row.names=FALSE)
 ```
 ### **Exploratory Data Analysis (EDA)**
@@ -363,7 +363,8 @@ ggplot(data = melt(Population_by_Age_Group, id.vars = "Year"),
 ### **Modeling**
 
 **ARIMA model and PROPHET model**
-  In forecasting the unemployment rate we used ARIMA and Prophet models, both ARIMA and Prophet models are commonly used time series forecasting models. By using m_lf (Male labor force), f_lf (Female labor force), m_employed (Male employed person), and f_employed (Female employed person) in the dataset we calculate the annual Malaysian Unemployment rate is calculated for each year, and the unemployment rate is projected for the next three years (2022, 2023, 2024) using two models, ARIMA and PROPHET, based on the distribution of data in both columns of year and unemployment rate.
+
+In forecasting the unemployment rate we used ARIMA and Prophet models, both ARIMA and Prophet models are commonly used time series forecasting models. By using m_lf (Male labor force), f_lf (Female labor force), m_employed (Male employed person), and f_employed (Female employed person) in the dataset we calculate the annual Malaysian Unemployment rate is calculated for each year, and the unemployment rate is projected for the next three years (2022, 2023, 2024) using two models, ARIMA and PROPHET, based on the distribution of data in both columns of year and unemployment rate.
 ```{r}
 # Libraries
 library(tseries)
@@ -375,7 +376,7 @@ library(hrbrthemes)
 library(viridis)
 library(randomForest)
 
-data <- read.csv(file.choose())
+data <- read.csv("clean-data.csv")
 
 
 # Plot
@@ -505,15 +506,28 @@ print(paste("Accuracy:", round(accuracy * 100, 2), "%"))
 ```
 
 ### **Discussion**
-1. Does the model prove if there is a trend of aging workforce in Malaysia?
-  The model proves that there is a trend of aging workforce in Malaysia.Because according to the model,we can get that aging workforce is appearing more frequently.
-2. Which model performs better for time-series data?
-  In our project, ARIMA and PROPHET models predict the unemployment rate in the ARIMA model performs better because the trend of our unemployment rate data is unstable and in this case, ARIMA performs better. ARIMA model has the adaptive capacity to handle the non-stationarity of the data through automatic difference and autoregressive moving average process. It can capture trends and seasonal patterns in the data and forecast them accordingly. In addition, the ARIMA model can provide confidence intervals on the forecast results for assessing the forecast uncertainty. This is useful for dealing with forecasts of unstable data. the Prophet model has some disadvantages in dealing with non-stationary data. the Prophet model uses a predefined trend and seasonal model and may not be flexible enough to accommodate certain complex non-linear trends or seasonal patterns.
+**1. Does the model prove if there is a trend of aging workforce in Malaysia?**
 
-3. What is the increase in percentage of unemployment rate in Malaysia?
-  First, we need to understand how to view the results of the ARIMA forecasts in the figure above. The last colored area in the figure is the forecast results for the three years 2022, 2023, and 2024, with the light gray area indicating the 95% confidence region (95% probability that the forecast results will fall in this range), and similarly the dark gray area indicating the 80% confidence region, and the blue dots indicating the average. From the graph, we can get that the career rate in 2022 has 80% probability between 0.04%-0.06%, 2023 is 0.035%-0.065%, 2024 is 0.032%-0.068%, and their average is 0.05%, which means that in the next three years, according to the ARIMA model, the unemployment rate will be about 0.05%.
+The Random Forest Classifier model proves that there is a trend of aging workforce in Malaysia. Because according to the model,we can get that aging workforce is appearing more frequently.
 
-4. What are the proposed mitigation measures on the aging workforce in Malaysia?
+**2. Which model performs better for time-series data?**
+
+In our project, ARIMA and PROPHET models predict the unemployment rate in the ARIMA model performs better because the trend of our unemployment rate data is unstable and in this case, ARIMA performs better. ARIMA model has the adaptive capacity to handle the non-stationary of the data through automatic difference and autoregressive moving average process. It can capture trends and seasonal patterns in the data and forecast them accordingly. In addition, the ARIMA model can provide confidence intervals on the forecast results for assessing the forecast uncertainty. This is useful for dealing with forecasts of unstable data. the Prophet model has some disadvantages in dealing with non-stationary data. the Prophet model uses a predefined trend and seasonal model and may not be flexible enough to accommodate certain complex non-linear trends or seasonal patterns.
+
+**3. What is the increase in percentage of unemployment rate in Malaysia?**
+
+First, we need to understand how to view the results of the ARIMA forecasts in the figure above. The last colored area in the figure is the forecast results for the three years 2022, 2023, and 2024, with the light gray area indicating the 95% confidence region (95% probability that the forecast results will fall in this range), and similarly the dark gray area indicating the 80% confidence region, and the blue dots indicating the average. From the graph, we can get that the career rate in 2022 has 80% probability between 0.04%-0.06%, 2023 is 0.035%-0.065%, 2024 is 0.032%-0.068%, and their average is 0.05%, which means that in the next three years, according to the ARIMA model, the unemployment rate will be increased by about 0.05%.
+
+**4. What are the proposed mitigation measures on the aging workforce in Malaysia?**
+
+From the previously discussed questions, the Random Forest Classifier has proven that Malaysia is currently facing the issue of an aging workforce. Additionally, the ARIMA model predicts an approximate 0.05% increase in the unemployment rate over the next three years. One possible explanation for the rising unemployment rate could be the discrimination and forced early retirement of aging labor force, particularly those within the age range of 60 to 64. Therefore, certain mitigation measures should be taken to ensure the welfare of the aging workforce, including:
+
+* Extending the retirement age: This measure facilitates knowledge retention and transfer, allowing older workers to share their valuable experience and expertise with younger colleagues. It prevents the loss of critical knowledge and ensures a smooth succession planning process.
+
+* Promoting age-inclusive recruitment and retention practices: This approach encourages employers to value and employ workers of all ages, fostering diversity and intergenerational collaboration between older and younger employees.
+
+* Providing lifelong learning and training: This initiative helps older workers update their skill sets and adapt to the constant changes in the industry. By enhancing the employability and productivity of older workers, it reduces the risk of unemployment.
 
 
 ### **Conclusion**
+It is important to implement mitigation measures to take care the welfare's of aging workforce as it helps to promote economic stability by minimizing the risks of unemployment and skills gaps in the aging workforce. In addition to that, by mitigating age0related employment challenges, it creates a positive social environment where individuals are valued regardless of their age and reduces age-related discrimination in the working environment. This leads to a better knowledge retention and transfer where older workers are able to pass down their valuable knowledge to the younger workers and prevent loss of critical knowledge. Overall, by implementing those proposed mitigation measures, societies can effectively address the challenges associated with aging workforce in Malaysia. It enables us to harness the potentials from older workers and create an inclusive and sustainable labor markets. 
