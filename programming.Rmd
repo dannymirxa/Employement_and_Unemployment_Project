@@ -358,7 +358,11 @@ ggplot(data = melt(Population_by_Age_Group, id.vars = "Year"),
 
 * The Total Malaysian Population age 14 and below slowly increasing unlike huge increase Malaysian age between 15 to 59, there is slow increase of Malaysian age 60 and above
 
-
+### Chart 8: Correlation Coefficient
+```{r}
+library(ggcorrplot)
+ggcorrplot(cor(df))
+```
 
 ### **Modeling**
 
@@ -452,7 +456,7 @@ lines(c(data$year[31:40]),lm_predictions,col="red",lwd=3,lty=2)
 legend("topleft", legend = c("Actual value", "Predictive value"), col = c("blue", "red"), lty = 1, lwd = 2)
 ```
 
-** Random Forest**
+### **Random Forest**
 
 ```{r}
 library(randomForest)
