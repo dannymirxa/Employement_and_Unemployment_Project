@@ -354,6 +354,13 @@ ggplot(data = melt(Population_by_Age_Group, id.vars = "Year"),
         labs(title = "Malaysia Population by Age Group", subtitle = "Malaysia Population by Age Group from 1982 to 2021", x = "Years", y = "Total Population")
 ```
 
+
+### Chart 8: Correlation Coefficient
+```{r}
+library(ggcorrplot)
+ggcorrplot(cor(df))
+```
+
 **Findings: **
 
 * The Total Malaysian Population age 14 and below slowly increasing unlike huge increase Malaysian age between 15 to 59, there is slow increase of Malaysian age 60 and above
