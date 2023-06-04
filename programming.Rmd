@@ -357,8 +357,9 @@ ggplot(data = melt(Population_by_Age_Group, id.vars = "Year"),
 
 ### Chart 8: Correlation Coefficient
 ```{r}
-library(ggcorrplot)
-ggcorrplot(cor(df))
+
+library(corrplot)
+corrplot(cor(df), addCoef.col = 'white', method = 'color', number.cex = 0.5,tl.cex = 0.5,tl.pos = 'lt')
 ```
 
 **Findings: **
